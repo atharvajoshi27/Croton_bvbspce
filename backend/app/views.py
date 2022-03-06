@@ -187,6 +187,7 @@ def upload_patient_data(request, patient_id):
     if doctor not in patient.access_list.all():
         return HttpResponse("Forbidden")
     print(f"Data = {request.POST}")
+    print("HEY HERE id = ", request.POST["type_id"])
     if request.POST["type_id"] == "report":
         report_file = request.FILES["report_file"]
         report_title = request.POST["report_title"]
@@ -206,7 +207,7 @@ def upload_patient_data(request, patient_id):
         new_report.save()
 
         mri_title = request.POST['mri_title']
-        mri_file = request.POST['mri_file']
+        mri_file = request.FILES['mri_file']
         new_mri = Mri(title=mri_title, document=mri_file, report=new_report, patient=patient)
         new_mri.save()
 
@@ -220,7 +221,7 @@ def upload_patient_data(request, patient_id):
         new_report.save()
 
         xray_title = request.POST['xray_title']
-        xray_file = request.POST['xray_file']
+        xray_file = request.FILES['xray_file']
         new_xray = Xray(title=xray_title, document=xray_file, report=new_report, patient=patient)
 
         new_xray.save()
@@ -229,7 +230,7 @@ def upload_patient_data(request, patient_id):
     elif request.POST["type_id"] == "prescription":
         p_title = request.POST["p_title"]
         p_date = request.POST["p_date"]
-        p_file = request.POST["p_file"]
+        p_file = request.FILES["p_file"]
         new_p = Prescription(title=p_title, date=p_date, document=p_file, patient=patient)
         if request.user.user_type == "1":
             new_p.doctor = request.user.doctor

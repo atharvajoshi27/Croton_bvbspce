@@ -40,7 +40,7 @@
 {% endif %}
 
 
-<form action="{% url 'upload-data' patient_id %}" method="POST">
+<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="hidden" name="type_id" value="report">
     <input type="text" name="report_title" placeholder="Report title">
@@ -86,7 +86,7 @@
 
 <form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <input type="hidden"  name="type_id" value="prescription">
+    <input type="hidden" name="type_id" value="prescription">
     <input type="text" name="p_title" placeholder="Prescription title">
     <input type="date" name="p_date" placeholder="Prescription date">
     <input type="file" name="p_file" placeholder="Prescription File">
