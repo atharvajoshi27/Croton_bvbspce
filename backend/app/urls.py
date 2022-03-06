@@ -15,7 +15,7 @@ urlpatterns = [
     path("data/<str:patient_id>", views.upload_patient_data, name='upload-data'),
     path("report/<str:r_id>", views.report_view, name='report-view'),
     path("xray/<str:r_id>", views.xray_view, name='xray-view'),
-    path("mri/<str:r_id>", views.report_view, name='mri-view'),
-    path("prescription/<str:r_id>", views.report_view, name='prescription-view'),
+    path("mri/<str:r_id>", views.mri_view, name='mri-view'),
+    path("prescription/<str:r_id>", views.prescription_view, name='prescription-view'),
     path("predictions", views.get_predictions, name='predictions'),
 ]

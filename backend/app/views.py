@@ -396,27 +396,33 @@ def get_predictions(request):
     xray_model = keras.models.load_model('app/xray.h5')
     mri_model = keras.models.load_model('app/mri.h5')
     for xray in xrays:
-        url = os.path.join(settings.BASE_DIR, xray.document.url[1:])
-        image = Image.open(url).resize((150, 150))
-        image = np.array(image).flatten()
-        image = image.reshape(-1,150,150,3)
-        prediction = xray_model.predict(image)[0][0]
-        if prediction < 0.5:
-            XRAYS[xray.title] = "No"
-        else:
-            XRAYS[xray.title] = "Yes"
+        try:
+            url = os.path.join(settings.BASE_DIR, xray.document.url[1:])
+            image = Image.open(url).resize((150, 150))
+            image = np.array(image).flatten()
+            image = image.reshape(-1,150,150,3)
+            prediction = xray_model.predict(image)[0][0]
+            if prediction < 0.5:
+                XRAYS[xray] = "No"
+            else:
+                XRAYS[xray] = "Yes"
+        except Exception as e:
+            print(e)
 
     for mri in mris:
-        url = os.path.join(settings.BASE_DIR, mri.document.url[1:])
-        image = Image.open(url).resize((224, 224))
-        image = np.array(image).flatten()
-        image = image.reshape(-1,224,224,3)
-        prediction = mri_model.predict(image)[0][0]
-        prediction = mri_model.predict(image)[0][0]
-        if prediction < 0.5:
-            MRIS[xray.title] = "No"
-        else:
-            MRIS[xray.title] = "Yes"
+        try:
+            url = os.path.join(settings.BASE_DIR, mri.document.url[1:])
+            image = Image.open(url).resize((224, 224))
+            image = np.array(image).flatten()
+            image = image.reshape(-1,224,224,3)
+            prediction = mri_model.predict(image)[0][0]
+            prediction = mri_model.predict(image)[0][0]
+            if prediction < 0.5:
+                MRIS[mri] = "No"
+            else:
+                MRIS[mri] = "Yes"
+        except Exception as e:
+            print(e)
 
     d['XRAYS'] = XRAYS
     d['MRIS'] = MRIS
