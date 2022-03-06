@@ -1,4 +1,7 @@
-<form action="{% url 'upload-docs' %}" method="POST">
+{% if error %}
+    {{ error }}
+{% endif %}
+<form action="{% url 'search-patient' %}" method="POST">
     {% csrf_token %}
     <input type="email" name="email" placeholder="Enter email of the patient" required>
     <input type="submit">

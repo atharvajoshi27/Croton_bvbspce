@@ -115,10 +115,10 @@ class Document(models.Model):
 class Report(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=256)
-    document = models.FileField()
     date = models.DateField()
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True)
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, null=True)
+    document = models.FileField(null=True)
     def save(self, *args, **kwargs):
         super(Report, self).save(*args, **kwargs)
         
@@ -145,6 +145,7 @@ class Xray(models.Model):
     title = models.CharField(max_length=256)
     document = models.ImageField()
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True)
     def save(self, *args, **kwargs):
         super(Xray, self).save(*args, **kwargs)
         
@@ -171,7 +172,7 @@ class Mri(models.Model):
     document = models.ImageField()
     title = models.CharField(max_length=256)
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
-
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True)
     def save(self, *args, **kwargs):
         super(Mri, self).save(*args, **kwargs)
         
@@ -191,11 +192,13 @@ class Mri(models.Model):
         os.replace(os.path.join(location, filename), os.path.join(location, os.path.join(UPLOAD_TO, new_name)))
         self.document.name = os.path.join(UPLOAD_TO, new_name)
         print(f"name = ", self.document.name)
+        
         super(Mri, self).save(*args, **kwargs)
 
 class Prescription(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=256)
+    date = models.DateField(null=True)
     document = models.FileField()
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)

@@ -1,7 +1,7 @@
 import smtplib
 
-sender = 'goguide.seproject@gmail.com'
-password = 'goguide@coep'
+sender = 'crotonbvbspce@gmail.com'
+password = 'croton@123'
 
 def mail(receiver, subject, body):
 	try :
