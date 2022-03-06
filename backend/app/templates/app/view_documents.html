@@ -1,0 +1,14 @@
+{% if otp %}
+    {% if error %}
+        {{ error }}
+    {% endif %}
+<form action="{% url 'view-documents' patient_id %}" method="POST">
+    {% csrf_token %}
+    <input type="number" name="otp" placeholder="Enter OTP" required>
+    <input type="submit">
+</form>
+
+{% else %}
+
+
+{% endif %}

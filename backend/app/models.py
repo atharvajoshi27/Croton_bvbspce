@@ -71,11 +71,6 @@ class User(AbstractBaseUser):
 # class User(AbstractUser):
 #     name = models.CharField(max_length=20)
 
-class Patient(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    encryption_key = models.CharField(max_length=512)
-
 
 class Doctor(models.Model):
     id = models.AutoField(primary_key=True)
@@ -84,7 +79,11 @@ class Doctor(models.Model):
     degree = models.CharField(max_length=256, blank=True, null=True)
     verified = models.BooleanField(default=False)
 
-    
+class Patient(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    encryption_key = models.CharField(max_length=512)
+    access_list = models.ManyToManyField(Doctor)    
 
 class Document(models.Model):
     id = models.AutoField(primary_key=True)
@@ -103,7 +102,7 @@ class Document(models.Model):
         filename = self.document.name
         extension = filename.split('.')[-1]
 
-        new_name = f"{filename}_{self.id}.{extension}"
+        new_name = f"{self.id}_{filename}"
         location = os.path.join(BASE_DIR, os.path.join('media'))
         print(f"Previous location: {os.path.join(location, filename)}, New location: {os.path.join(location, os.path.join(UPLOAD_TO, new_name))}")
         os.replace(os.path.join(location, filename), os.path.join(location, os.path.join(UPLOAD_TO, new_name)))
@@ -116,32 +115,111 @@ class Document(models.Model):
 class Report(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=256)
+    document = models.FileField()
     date = models.DateField()
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    def save(self, *args, **kwargs):
+        super(Report, self).save(*args, **kwargs)
+        
+        BASE_DIR = settings.BASE_DIR
+        UPLOAD_TO = f'Patient/{self.patient.id}/Reports/'
+        path = os.path.join(BASE_DIR, f'media/Patient/{self.patient.id}/Reports/')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        # print(f"profile_pic.name = {self.profile_pic.name}")
+        # print(f"profile pic name = {self.profile_pic.name}")
+        filename = self.document.name
+        extension = filename.split('.')[-1]
 
+        new_name = f"{self.id}_{filename}"
+        location = os.path.join(BASE_DIR, os.path.join('media'))
+        print(f"Previous location: {os.path.join(location, filename)}, New location: {os.path.join(location, os.path.join(UPLOAD_TO, new_name))}")
+        os.replace(os.path.join(location, filename), os.path.join(location, os.path.join(UPLOAD_TO, new_name)))
+        self.document.name = os.path.join(UPLOAD_TO, new_name)
+        print(f"name = ", self.document.name)
+        super(Report, self).save(*args, **kwargs)
 
 class Xray(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=256)
-    image = models.ImageField()
+    document = models.ImageField()
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    def save(self, *args, **kwargs):
+        super(Xray, self).save(*args, **kwargs)
+        
+        BASE_DIR = settings.BASE_DIR
+        UPLOAD_TO = f'Patient/{self.patient.id}/Xrays/'
+        path = os.path.join(BASE_DIR, f'media/Patient/{self.patient.id}/Xrays/')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        # print(f"profile_pic.name = {self.profile_pic.name}")
+        # print(f"profile pic name = {self.profile_pic.name}")
+        filename = self.document.name
+        extension = filename.split('.')[-1]
 
+        new_name = f"{self.id}_{filename}"
+        location = os.path.join(BASE_DIR, os.path.join('media'))
+        print(f"Previous location: {os.path.join(location, filename)}, New location: {os.path.join(location, os.path.join(UPLOAD_TO, new_name))}")
+        os.replace(os.path.join(location, filename), os.path.join(location, os.path.join(UPLOAD_TO, new_name)))
+        self.document.name = os.path.join(UPLOAD_TO, new_name)
+        print(f"name = ", self.document.name)
+        super(Xray, self).save(*args, **kwargs)
 
 class Mri(models.Model):
     id = models.AutoField(primary_key=True)
-    image = models.ImageField()
+    document = models.ImageField()
     title = models.CharField(max_length=256)
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        super(Mri, self).save(*args, **kwargs)
+        
+        BASE_DIR = settings.BASE_DIR
+        UPLOAD_TO = f'Patient/{self.patient.id}/Mris/'
+        path = os.path.join(BASE_DIR, f'media/Patient/{self.patient.id}/Mris/')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        # print(f"profile_pic.name = {self.profile_pic.name}")
+        # print(f"profile pic name = {self.profile_pic.name}")
+        filename = self.document.name
+        extension = filename.split('.')[-1]
+
+        new_name = f"{self.id}_{filename}"
+        location = os.path.join(BASE_DIR, os.path.join('media'))
+        print(f"Previous location: {os.path.join(location, filename)}, New location: {os.path.join(location, os.path.join(UPLOAD_TO, new_name))}")
+        os.replace(os.path.join(location, filename), os.path.join(location, os.path.join(UPLOAD_TO, new_name)))
+        self.document.name = os.path.join(UPLOAD_TO, new_name)
+        print(f"name = ", self.document.name)
+        super(Mri, self).save(*args, **kwargs)
 
 class Prescription(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=256)
-    prescription = models.FileField()
+    document = models.FileField()
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        super(Prescription, self).save(*args, **kwargs)
+        
+        BASE_DIR = settings.BASE_DIR
+        UPLOAD_TO = f'Patient/{self.patient.id}/Prescriptions/'
+        path = os.path.join(BASE_DIR, f'media/Patient/{self.patient.id}/Prescriptions/')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        # print(f"profile_pic.name = {self.profile_pic.name}")
+        # print(f"profile pic name = {self.profile_pic.name}")
+        filename = self.document.name
+        extension = filename.split('.')[-1]
+
+        new_name = f"{self.id}_{filename}"
+        location = os.path.join(BASE_DIR, os.path.join('media'))
+        print(f"Previous location: {os.path.join(location, filename)}, New location: {os.path.join(location, os.path.join(UPLOAD_TO, new_name))}")
+        os.replace(os.path.join(location, filename), os.path.join(location, os.path.join(UPLOAD_TO, new_name)))
+        self.document.name = os.path.join(UPLOAD_TO, new_name)
+        print(f"name = ", self.document.name)
+        super(Prescription, self).save(*args, **kwargs)
     # optional fields
     # profile_pic = models.ImageField(default='Profiles/default.png')
     # about = models.TextField(null=True, blank=True)

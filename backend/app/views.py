@@ -11,6 +11,8 @@ from .models import *
 from .forms import CreateUser
 import string
 import random
+from django.core.exceptions import ObjectDoesNotExist
+from .emailer import mail
 # Create your views here.
 @login_required
 def index(request):
@@ -111,4 +113,51 @@ def upload_docs(request):
         doctor.save()
         d.save()
     return redirect('index')
-    
+
+# need to give at max 3 trials : to be done
+@login_required
+@require_http_methods(["GET", "POST"])
+def view_document_list(request, patient_id):
+    if request.user.user_type == "0" and request.user.patient.id != patient_id:
+        return HttpResponse("<h2>Forbidden</h2>")
+    try:
+        patient = Patient.objects.get(id=patient_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("No such patient exist")
+
+    if request.method == "GET":
+        if request.user.user_type == "1": # doctor
+            doctor = request.user.doctor
+            if not patient in doctor.patient_set.all():
+                otp = "".join(random.choice(string.digits, k=6))
+                request.session[f"{patient_id}_OTP"] = otp
+                mail(patient.user.email, "OTP for accessing documents", f"Your OTP is {otp}")
+                context = {'otp': True, 'patient_id': patient_id}
+                return render(request, 'app/view_documents.html', context=context)
+            reports = patient.report_set.all()
+            mris = patient.mri_set.all()
+            xrays = patient.xray_set.all()
+            prescriptions = patient.prescription_set.all()
+            context = {'reports': reports, 'mris': mris, 'xrays': xrays, 'prescriptions': prescriptions}
+            return render(request, 'app/view_documents', context=context)
+    else:
+        otp = request.POST['otp']
+        if request.session.get(f'{patient_id}_OTP', 'NONE') == otp:
+            patient.access_list.add(request.user.doctor)
+            return redirect('view-documents', patient_id=patient_id)
+        context = {'otp': True, 'patient_id': patient_id, 'error': "Incorrect OTP"}
+        return render(request, 'app/view_documents.html', context=context)
+        
+
+@login_required
+def search_patient(request):
+    if request.method == "GET":
+        return render(request, 'app/search_patient.html')
+    else:
+        email = request.POST["email"]
+        try:
+            user = User.objects.get(email=email)
+        except ObjectDoesNotExist:
+            context = {"error": "Enter valid patient"}
+            return render(request, 'app/search_patient.html', context=context)
+        return view_documents()

@@ -1,0 +1,5 @@
+<form action="{% url 'upload-docs' %}" method="POST">
+    {% csrf_token %}
+    <input type="email" name="email" placeholder="Enter email of the patient" required>
+    <input type="submit">
+</form>
