@@ -1,3 +1,4 @@
+import numpy as np
 import datetime
 from django.db import connection
 from django.shortcuts import HttpResponse, redirect, render, HttpResponseRedirect, reverse
@@ -18,6 +19,8 @@ from django.http import FileResponse, Http404
 import mimetypes
 from django.conf import settings
 import os
+import keras
+from PIL import Image
 
 # Create your views here.
 @login_required
@@ -380,3 +383,42 @@ def prescription_view(request, r_id):
         return FileResponse(open(url, 'rb'), content_type=mimetype)
     except FileNotFoundError:
         raise Http404()
+
+@login_required
+def get_predictions(request):
+    if request.user.user_type == "1":
+        return HttpResponse("Forbidden")
+    xrays = request.user.patient.xray_set.all()
+    mris = request.user.patient.mri_set.all()
+    d = {}
+    XRAYS = {}
+    MRIS = {}
+    xray_model = keras.models.load_model('app/xray.h5')
+    mri_model = keras.models.load_model('app/mri.h5')
+    for xray in xrays:
+        url = os.path.join(settings.BASE_DIR, xray.document.url[1:])
+        image = Image.open(url).resize((150, 150))
+        image = np.array(image).flatten()
+        image = image.reshape(-1,150,150,3)
+        prediction = xray_model.predict(image)[0][0]
+        if prediction < 0.5:
+            XRAYS[xray.title] = "No"
+        else:
+            XRAYS[xray.title] = "Yes"
+
+    for mri in mris:
+        url = os.path.join(settings.BASE_DIR, mri.document.url[1:])
+        image = Image.open(url).resize((224, 224))
+        image = np.array(image).flatten()
+        image = image.reshape(-1,224,224,3)
+        prediction = mri_model.predict(image)[0][0]
+        prediction = mri_model.predict(image)[0][0]
+        if prediction < 0.5:
+            MRIS[xray.title] = "No"
+        else:
+            MRIS[xray.title] = "Yes"
+
+    d['XRAYS'] = XRAYS
+    d['MRIS'] = MRIS
+    return render(request, 'app/predictions.html', context=d)
+

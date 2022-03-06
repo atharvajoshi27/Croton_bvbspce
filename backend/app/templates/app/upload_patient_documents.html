@@ -67,7 +67,14 @@
       </a>
     </li><!-- End Profile Page Nav -->
     {% endif %}
-
+    {% if request.user.user_type == "0" %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'upload-only-site' %}">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Log Out</span>
+            </a>
+        </li>
+    {% endif %}
     <li class="nav-item">
       <a class="nav-link collapsed" href="{% url 'logout' %}">
         <i class="bi bi-box-arrow-right"></i>
