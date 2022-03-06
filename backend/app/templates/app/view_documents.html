@@ -1,97 +1,142 @@
-{% if otp %}
-    {% if error %}
-        {{ error }}
-    {% endif %}
-<form action="{% url 'view-documents' patient_id %}" method="POST">
-    {% csrf_token %}
-    <input type="number" name="otp" placeholder="Enter OTP" required>
-    <input type="submit">
-</form>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% else %}
-    {% if reports %}
-        <h1>Reports</h1>
-        {% for report in reports %}
-            <h1>{{ report.title }}</h1>>
-        {% endfor %}
-    {% endif %}
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    {% if mris %}
-        <h1>MRIS</h1>
-        {% for mri in mris %}
-        <h1>{{ mri.title }}</h1>>
-        {% endfor %}
-    {% endif %}
+  <title>Components / Cards - NiceAdmin Bootstrap Template</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
 
-    {% if xrays %}
-        <h1>XRAYS</h1>
-        {% for xray in xrays %}
-        <h1>{{ xray.title }}</h1>>
-        {% endfor %}
-    {% endif %}
+  <!-- Favicons -->
+  <link href={% static 'app/assets/img/favicon.png' %} rel="icon">
+  <link href={% static 'app/assets/img/apple-touch-icon.png' %} rel="apple-touch-icon">
 
-    {% if prescriptions %}
-        <h1>Prescriptions</h1>
-        {% for prescription in prescriptions %}
-        <h1>{{ prescription.title }}</h1>>
-        {% endfor %}
-    {% endif %}
-    <!-- context = {'reports': reports, 'mris': mris, 'xrays': xrays, 'prescriptions': prescriptions}} -->
-{% endif %}
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href={% static 'app/assets/vendor/bootstrap/css/bootstrap.min.css' %} rel="stylesheet">
+  <link href={% static 'app/assets/vendor/bootstrap-icons/bootstrap-icons.css' %} rel="stylesheet">
+  <link href={% static 'app/assets/vendor/boxicons/css/boxicons.min.css' %} rel="stylesheet">
+  <link href={% static 'app/assets/vendor/quill/quill.snow.css' %} rel="stylesheet">
+  <link href={% static 'app/assets/vendor/quill/quill.bubble.css' %} rel="stylesheet">
+  <link href={% static 'app/assets/vendor/remixicon/remixicon.css' %} rel="stylesheet">
+  <link href={% static 'app/assets/vendor/simple-datatables/style.css' %} rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href={% static 'app/assets/css/style.css' %} rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: NiceAdmin - v2.2.0
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <!-- ======= Sidebar ======= -->
+  <!-- <aside id="sidebar" class="sidebar"> -->
+
+  <!-- </aside>End Sidebar -->
+
+  <main id="main" class="main">
 
 
-<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="hidden" name="type_id" value="report">
-    <input type="text" name="report_title" placeholder="Report title">
-    <input type="date" name="report_date" placeholder="Report date">
-    <input type="file" name="report_file" placeholder="Report File">
-    <input type="submit">
-</form>
-<br>
-<br>
-<br>
+    <section class="section">
+      <div class="row align-items-top">
+         
+        {% if reports %}
+          <h1>REPORTS</h1>
+            {% for report in reports %}
+                <div class="col-6">
+                    <!-- Card with an image on top -->
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ report.title }}</h5>
+                        <p class="card-text">{{ report.date }}</p>
+                      </div>
+                    </div><!-- End Card with an image on top -->
+          
+                  </div>
+            {% endfor %}
+        {% endif %}
 
-<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data" >
-    {% csrf_token %}
-    <input type="hidden"  name="type_id" value="mri">
+        
+        {% if xrays %}
+            <h1>XRAYS</h1>
+            {% for xray in xrays %}
+                <div class="col-6">
+                    <!-- Card with an image on top -->
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ xray.title }}</h5>
+                        <p class="card-text">{{ xray.report.date }}</p>
+                      </div>
+                    </div><!-- End Card with an image on top -->
+          
+                  </div>
+            {% endfor %}
+        {% endif %}
 
-    <input type="text" name="mri_title" placeholder="MRI title">
-    <input type="file" name="mri_file" placeholder="MRI File">
+        {% if mris %}
+            <h1>MRIS</h1>
+            {% for mri in mris %}
+                <div class="col-6">
+                    <!-- Card with an image on top -->
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ mri.title }}</h5>
+                        <p class="card-text">{{ mri.report.date }}</p>
+                      </div>
+                    </div><!-- End Card with an image on top -->
+          
+                  </div>
+            {% endfor %}
+        {% endif %}
 
-    <input type="text" name="report_title" placeholder="Report title">
-    <input type="date" name="report_date" placeholder="Report date">
-    <input type="file" name="report_file" placeholder="Report File">
-    <input type="submit">
-</form>
-<br>
-<br>
-<br>
+        {% if prescriptions %}
+          <h1>PRESCRIPTIONS</h1>
+            {% for p in prescriptions %}
+                <div class="col-6">
+                    <!-- Card with an image on top -->
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ p.title }}</h5>
+                        <p class="card-text">{{ p.date }}</p>
+                      </div>
+                    </div><!-- End Card with an image on top -->
+          
+                  </div>
+            {% endfor %}
+        {% endif %}
+      </div>
+    </section>
 
-<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="hidden"  name="type_id" value="xray">
+  </main><!-- End #main -->
 
-    <input type="text" name="xray_title" placeholder="XRAY title">
-    <input type="file" name="xray_file" placeholder="XRAY File">
 
-    <input type="text" name="report_title" placeholder="Report title">
-    <input type="date" name="report_date" placeholder="Report date">
-    <input type="file" name="report_file" placeholder="Report File">
-    <input type="submit">
-</form>
-<br>
-<br>
-<br>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="hidden" name="type_id" value="prescription">
-    <input type="text" name="p_title" placeholder="Prescription title">
-    <input type="date" name="p_date" placeholder="Prescription date">
-    <input type="file" name="p_file" placeholder="Prescription File">
-    <input type="submit">
-</form>
-<br>
-<br>
-<br>
+  <!-- Vendor JS Files -->
+  <script src={% static 'app/assets/vendor/apexcharts/apexcharts.min.js' %}></script>
+  <script src={% static 'app/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}></script>
+  <script src={% static 'app/assets/vendor/chart.js/chart.min.js' %}></script>
+  <script src={% static 'app/assets/vendor/echarts/echarts.min.js' %}></script>
+  <script src={% static 'app/assets/vendor/quill/quill.min.js' %}></script>
+  <script src={% static 'app/assets/vendor/simple-datatables/simple-datatables.js' %}></script>
+  <script src={% static 'app/assets/vendor/tinymce/tinymce.min.js' %}></script>
+  <script src={% static 'app/assets/vendor/php-email-form/validate.js' %}></script>
+
+  <!-- Template Main JS File -->
+  <script src={% static 'app/assets/js/main.js' %}></script>
+
+</body>
+
+</html>

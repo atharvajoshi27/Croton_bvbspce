@@ -1,0 +1,102 @@
+{% if otp %}
+    {% if error %}
+        {{ error }}
+    {% endif %}
+<form action="{% url 'view-documents' patient_id %}" method="POST">
+    {% csrf_token %}
+    <input type="number" name="otp" placeholder="Enter OTP" required>
+    <input type="submit">
+</form>
+
+{% else %}
+    <h1>REPORTS</h1>
+    {% if reports %}
+
+        {% for report in reports %}
+            <h5>{{ report.title }}</h5>
+            <h5>{{ report.date }}</h5>
+        {% endfor %}
+    {% endif %}
+
+    {% if mris %}
+        <h1>MRIS</h1>
+        {% for mri in mris %}
+            <h5>{{ mri.title }}</h5>
+            <h5>{{ mri.report.date }}</h5>
+        {% endfor %}
+    {% endif %}
+
+    {% if xrays %}
+        <h1>XRAYS</h1>
+        {% for xray in xrays %}
+            <h5>{{ xray.title }}</h5>
+            <h5>{{ xray.report.date }}</h5>
+        {% endfor %}
+    {% endif %}
+
+    {% if prescriptions %}
+        <h1>Prescriptions</h1>
+        {% for p in prescriptions %}
+            <h5>{{ p.title }}</h5>
+            <h5>{{ p.date }}</h5>
+        {% endfor %}
+    {% endif %}
+    <!-- context = {'reports': reports, 'mris': mris, 'xrays': xrays, 'prescriptions': prescriptions}} -->
+{% endif %}
+
+
+<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="type_id" value="report">
+    <input type="text" name="report_title" placeholder="Report title">
+    <input type="date" name="report_date" placeholder="Report date">
+    <input type="file" name="report_file" placeholder="Report File">
+    <input type="submit">
+</form>
+<br>
+<br>
+<br>
+
+<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data" >
+    {% csrf_token %}
+    <input type="hidden"  name="type_id" value="mri">
+
+    <input type="text" name="mri_title" placeholder="MRI title">
+    <input type="file" name="mri_file" placeholder="MRI File">
+
+    <input type="text" name="report_title" placeholder="Report title">
+    <input type="date" name="report_date" placeholder="Report date">
+    <input type="file" name="report_file" placeholder="Report File">
+    <input type="submit">
+</form>
+<br>
+<br>
+<br>
+
+<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden"  name="type_id" value="xray">
+
+    <input type="text" name="xray_title" placeholder="XRAY title">
+    <input type="file" name="xray_file" placeholder="XRAY File">
+
+    <input type="text" name="report_title" placeholder="Report title">
+    <input type="date" name="report_date" placeholder="Report date">
+    <input type="file" name="report_file" placeholder="Report File">
+    <input type="submit">
+</form>
+<br>
+<br>
+<br>
+
+<form action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="type_id" value="prescription">
+    <input type="text" name="p_title" placeholder="Prescription title">
+    <input type="date" name="p_date" placeholder="Prescription date">
+    <input type="file" name="p_file" placeholder="Prescription File">
+    <input type="submit">
+</form>
+<br>
+<br>
+<br>

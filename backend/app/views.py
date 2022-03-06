@@ -13,6 +13,12 @@ import string
 import random
 from django.core.exceptions import ObjectDoesNotExist
 from .emailer import mail
+from django.http import FileResponse, Http404
+# import magic
+import mimetypes
+from django.conf import settings
+import os
+
 # Create your views here.
 @login_required
 def index(request):
@@ -240,3 +246,76 @@ def upload_patient_data(request, patient_id):
         return HttpResponse("Not found")
     return HttpResponse("Success")
     # return redirect('view-documents', patient_id)
+
+
+@login_required
+def report_view(request, r_id):
+    try:
+        report = Report.objects.get(id=r_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("Not found")
+
+    try:
+        # mime = magic.Magic(mime=True)
+        # mimetype = mime.from_file(report.document.url) # 'application/pdf'
+        print(f"BASE_DIR = {settings.BASE_DIR}")
+        url = os.path.join(settings.BASE_DIR, report.document.url[1:])
+        print("url = ", url)
+        mimetype = mimetypes.guess_type(url)[0]
+        return FileResponse(open(url, 'rb'), content_type=mimetype)
+    except FileNotFoundError:
+        raise Http404()
+
+@login_required
+def xray_view(request, r_id):
+    try:
+        report = Xray.objects.get(id=r_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("Not found")
+
+    try:
+        # mime = magic.Magic(mime=True)
+        # mimetype = mime.from_file(report.document.url) # 'application/pdf'
+        print(f"BASE_DIR = {settings.BASE_DIR}")
+        url = os.path.join(settings.BASE_DIR, report.document.url[1:])
+        print("url = ", url)
+        mimetype = mimetypes.guess_type(url)[0]
+        return FileResponse(open(url, 'rb'), content_type=mimetype)
+    except FileNotFoundError:
+        raise Http404()
+
+@login_required
+def mri_view(request, r_id):
+    try:
+        report = Mri.objects.get(id=r_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("Not found")
+
+    try:
+        # mime = magic.Magic(mime=True)
+        # mimetype = mime.from_file(report.document.url) # 'application/pdf'
+        print(f"BASE_DIR = {settings.BASE_DIR}")
+        url = os.path.join(settings.BASE_DIR, report.document.url[1:])
+        print("url = ", url)
+        mimetype = mimetypes.guess_type(url)[0]
+        return FileResponse(open(url, 'rb'), content_type=mimetype)
+    except FileNotFoundError:
+        raise Http404()
+
+@login_required
+def prescription_view(request, r_id):
+    try:
+        report = Prescription.objects.get(id=r_id)
+    except ObjectDoesNotExist:
+        return HttpResponse("Not found")
+
+    try:
+        # mime = magic.Magic(mime=True)
+        # mimetype = mime.from_file(report.document.url) # 'application/pdf'
+        print(f"BASE_DIR = {settings.BASE_DIR}")
+        url = os.path.join(settings.BASE_DIR, report.document.url[1:])
+        print("url = ", url)
+        mimetype = mimetypes.guess_type(url)[0]
+        return FileResponse(open(url, 'rb'), content_type=mimetype)
+    except FileNotFoundError:
+        raise Http404()
