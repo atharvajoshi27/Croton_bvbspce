@@ -45,7 +45,8 @@ def index_patient(request):
     user = request.user
     if user.user_type == "1":
         return redirect('index-doctor')
-    return HttpResponse("Work in progress of patient index")
+    return redirect('view-documents', request.user.patient.id)
+    # return HttpResponse("Work in progress of patient index")
 
 def register(request):
     if request.user.is_authenticated:
@@ -128,7 +129,7 @@ def upload_docs(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def view_documents(request, patient_id):
-    if request.user.user_type == "0" and request.user.patient.id != patient_id:
+    if request.user.user_type == "0" and request.user.patient.id != int(patient_id):
         return HttpResponse("<h2>Forbidden</h2>")
     try:
         patient = Patient.objects.get(id=patient_id)
@@ -144,12 +145,14 @@ def view_documents(request, patient_id):
                 mail(patient.user.email, "OTP for accessing documents", f"Your OTP is {otp}")
                 context = {'otp': True, 'patient_id': patient_id}
                 return render(request, 'app/view_documents.html', context=context)
-            reports = patient.report_set.all()
-            mris = patient.mri_set.all()
-            xrays = patient.xray_set.all()
-            prescriptions = patient.prescription_set.all()
-            context = {'reports': reports, 'mris': mris, 'xrays': xrays, 'prescriptions': prescriptions, 'patient_id': patient_id}
-            return render(request, 'app/view_documents.html', context=context)
+        reports = patient.report_set.all()
+        mris = patient.mri_set.all()
+        xrays = patient.xray_set.all()
+        prescriptions = patient.prescription_set.all()
+        something = (len(reports) or len(mris) or len(xrays) or len(prescriptions))
+        context = {'reports': reports, 'mris': mris, 'xrays': xrays, 'prescriptions': prescriptions, 'patient_id': patient_id, 'something': something}
+        return render(request, 'app/view_documents.html', context=context)
+        
     else:
         otp = request.POST['otp']
         actual_otp = request.session[f"{patient_id}_OTP"]
@@ -189,9 +192,10 @@ def upload_patient_data(request, patient_id):
         patient = Patient.objects.get(id=patient_id)
     except ObjectDoesNotExist:
         return HttpResponse("Patient not found.")
-    doctor = request.user.doctor
-    if doctor not in patient.access_list.all():
-        return HttpResponse("Forbidden")
+    if request.user.user_type == "1":
+        doctor = request.user.doctor
+        if doctor not in patient.access_list.all():
+            return HttpResponse("Forbidden")
     print(f"Data = {request.POST}")
     print("HEY HERE id = ", request.POST["type_id"])
     if request.POST["type_id"] == "report":
@@ -247,6 +251,14 @@ def upload_patient_data(request, patient_id):
     return HttpResponse("Success")
     # return redirect('view-documents', patient_id)
 
+def validity_check(user, patient):
+    if user.user_type == "0" and user.patient.id != patient.id:
+        return False
+    
+    if user.user_type == "1" and (not user.doctor in patient.access_list.all()):
+        return False
+
+    return True
 
 @login_required
 def report_view(request, r_id):
@@ -254,6 +266,9 @@ def report_view(request, r_id):
         report = Report.objects.get(id=r_id)
     except ObjectDoesNotExist:
         return HttpResponse("Not found")
+
+    if not validity_check(request.user, report.patient):
+        return HttpResponse("Forbidden")
 
     try:
         # mime = magic.Magic(mime=True)
@@ -273,6 +288,9 @@ def xray_view(request, r_id):
     except ObjectDoesNotExist:
         return HttpResponse("Not found")
 
+    if not validity_check(request.user, report.patient):
+        return HttpResponse("Forbidden")
+
     try:
         # mime = magic.Magic(mime=True)
         # mimetype = mime.from_file(report.document.url) # 'application/pdf'
@@ -286,10 +304,14 @@ def xray_view(request, r_id):
 
 @login_required
 def mri_view(request, r_id):
+
     try:
         report = Mri.objects.get(id=r_id)
     except ObjectDoesNotExist:
         return HttpResponse("Not found")
+
+    if not validity_check(request.user, report.patient):
+        return HttpResponse("Forbidden")
 
     try:
         # mime = magic.Magic(mime=True)
@@ -309,6 +331,8 @@ def prescription_view(request, r_id):
     except ObjectDoesNotExist:
         return HttpResponse("Not found")
 
+    if not validity_check(request.user, report.patient):
+        return HttpResponse("Forbidden")
     try:
         # mime = magic.Magic(mime=True)
         # mimetype = mime.from_file(report.document.url) # 'application/pdf'

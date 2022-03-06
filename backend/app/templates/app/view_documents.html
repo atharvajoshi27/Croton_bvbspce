@@ -59,7 +59,7 @@
                     <!-- Card with an image on top -->
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">{{ report.title }}</h5>
+                        <h5 class="card-title"><a href="{% url 'report-view' report.id %}">{{ report.title }}</a></h5>
                         <p class="card-text">{{ report.date }}</p>
                       </div>
                     </div><!-- End Card with an image on top -->
@@ -76,7 +76,7 @@
                     <!-- Card with an image on top -->
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">{{ xray.title }}</h5>
+                        <h5 class="card-title"><a href="{% url 'xray-view' xray.id %}">{{ xray.title }}</a></h5>
                         <p class="card-text">{{ xray.report.date }}</p>
                       </div>
                     </div><!-- End Card with an image on top -->
@@ -92,7 +92,7 @@
                     <!-- Card with an image on top -->
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">{{ mri.title }}</h5>
+                        <h5 class="card-title"><a href="{% url 'mri-view' mri.id %}">{{ mri.title }}</a></h5>
                         <p class="card-text">{{ mri.report.date }}</p>
                       </div>
                     </div><!-- End Card with an image on top -->
@@ -108,7 +108,7 @@
                     <!-- Card with an image on top -->
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">{{ p.title }}</h5>
+                        <h5 class="card-title"><a href="{% url 'prescription-view' p.id %}">{{ p.title }}</a></h5>
                         <p class="card-text">{{ p.date }}</p>
                       </div>
                     </div><!-- End Card with an image on top -->
@@ -118,6 +118,191 @@
         {% endif %}
       </div>
     </section>
+    <br>
+    <br>
+    <br>
+    <h1>Upload Documents</h1>
+    <br>
+  
+    <h2>Report</h2>
+    <form  action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="type_id" value="report">
+      <div class="row mb-3">
+        <label for="inputText" class="col-sm-2 col-form-label">Report Title</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="report_title">
+        </div>
+      </div>
+      
+
+      <div class="row mb-3">
+        <label for="inputDate" class="col-sm-2 col-form-label">Date</label>
+        <div class="col-sm-10">
+          <input type="date" class="form-control" name="report_date">
+        </div>
+      </div>      
+
+      <div class="row mb-3">
+        <label for="inputNumber" class="col-sm-2 col-form-label">Report File</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="formFile" name="report_file">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-2 col-form-label">Submit Button</label>
+        <div class="col-sm-10">
+          <button type="submit" class="btn btn-primary">Submit Form</button>
+        </div>
+      </div>
+
+    </form>
+
+    <br>
+    <br>
+    <br>
+
+    <h2>XRAY</h2>
+    <form  action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="type_id" value="xray">
+      <div class="row mb-3">
+        <label for="inputText" class="col-sm-2 col-form-label">Report Title</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="report_title">
+        </div>
+      </div>
+      
+
+      <div class="row mb-3">
+        <label for="inputDate" class="col-sm-2 col-form-label">Date</label>
+        <div class="col-sm-10">
+          <input type="date" class="form-control" name="report_date">
+        </div>
+      </div>      
+
+      <div class="row mb-3">
+        <label for="inputNumber" class="col-sm-2 col-form-label">Report File</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="formFile" name="report_file">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="inputText" class="col-sm-2 col-form-label">Xray Title</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="xray_title">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="inputNumber" class="col-sm-2 col-form-label">XRAY File</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="formFile" name="xray_file">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-2 col-form-label">Submit Button</label>
+        <div class="col-sm-10">
+          <button type="submit" class="btn btn-primary">Submit Form</button>
+        </div>
+      </div>
+
+    </form>
+
+    <br>
+    <br>
+    <br>
+
+    <h2>MRI</h2>
+    <form  action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="type_id" value="mri">
+      <div class="row mb-3">
+        <label for="inputText" class="col-sm-2 col-form-label">Report Title</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="report_title">
+        </div>
+      </div>
+      
+
+      <div class="row mb-3">
+        <label for="inputDate" class="col-sm-2 col-form-label">Date</label>
+        <div class="col-sm-10">
+          <input type="date" class="form-control" name="report_date">
+        </div>
+      </div>      
+
+      <div class="row mb-3">
+        <label for="inputNumber" class="col-sm-2 col-form-label">Report File</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="formFile" name="report_file">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="inputText" class="col-sm-2 col-form-label">MRI Title</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="mri_title">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label for="inputNumber" class="col-sm-2 col-form-label">MRI File</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="formFile" name="mri_file">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-2 col-form-label">Submit Button</label>
+        <div class="col-sm-10">
+          <button type="submit" class="btn btn-primary">Submit Form</button>
+        </div>
+      </div>
+
+    </form>
+
+    <br>
+    <br>
+    <br>
+
+    <h2>Prescription</h2>
+    <form  action="{% url 'upload-data' patient_id %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="type_id" value="prescription">
+      <div class="row mb-3">
+        <label for="inputText" class="col-sm-2 col-form-label">Prescription Title</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="p_title">
+        </div>
+      </div>
+      
+
+      <div class="row mb-3">
+        <label for="inputDate" class="col-sm-2 col-form-label">Date</label>
+        <div class="col-sm-10">
+          <input type="date" class="form-control" name="p_date">
+        </div>
+      </div>      
+
+      <div class="row mb-3">
+        <label for="inputNumber" class="col-sm-2 col-form-label">Prescription File</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="formFile" name="p_file">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-2 col-form-label">Submit Button</label>
+        <div class="col-sm-10">
+          <button type="submit" class="btn btn-primary">Submit Form</button>
+        </div>
+      </div>
+
+    </form>
 
   </main><!-- End #main -->
 
