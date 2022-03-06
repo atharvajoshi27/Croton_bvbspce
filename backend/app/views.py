@@ -37,8 +37,9 @@ def index_doctor(request):
     doctor = user.doctor
     if not doctor.verified:
         return redirect('upload-docs')
-    
-    return HttpResponse("Work in progress of Doctor index")
+    # patients = doctor.access_list_set.all()
+    return redirect(search_patient)
+    # return HttpResponse("Work in progress of Doctor index")
 
 @login_required
 def index_patient(request):
@@ -127,41 +128,37 @@ def upload_docs(request):
 
 # need to give at max 3 trials : to be done
 @login_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET"])
 def view_documents(request, patient_id):
     if request.user.user_type == "0" and request.user.patient.id != int(patient_id):
         return HttpResponse("<h2>Forbidden</h2>")
+    
     try:
         patient = Patient.objects.get(id=patient_id)
     except ObjectDoesNotExist:
         return HttpResponse("No such patient exist")
+    if request.user.user_type == "1" and (not request.user.doctor in patient.access_list.all()):
+        return redirect('search-patient')
 
-    if request.method == "GET":
-        if request.user.user_type == "1": # doctor
-            doctor = request.user.doctor
-            if not patient in doctor.patient_set.all():
-                otp = "".join(random.choices(string.digits, k=6))
-                request.session[f"{patient_id}_OTP"] = otp
-                mail(patient.user.email, "OTP for accessing documents", f"Your OTP is {otp}")
-                context = {'otp': True, 'patient_id': patient_id}
-                return render(request, 'app/view_documents.html', context=context)
-        reports = patient.report_set.all()
-        mris = patient.mri_set.all()
-        xrays = patient.xray_set.all()
-        prescriptions = patient.prescription_set.all()
-        something = (len(reports) or len(mris) or len(xrays) or len(prescriptions))
-        context = {'reports': reports, 'mris': mris, 'xrays': xrays, 'prescriptions': prescriptions, 'patient_id': patient_id, 'something': something}
-        return render(request, 'app/view_documents.html', context=context)
+    # if request.method == "GET":
         
-    else:
-        otp = request.POST['otp']
-        actual_otp = request.session[f"{patient_id}_OTP"]
-        print(f"Actual OTP = {actual_otp} and received otp = {otp}")
-        if request.session.get(f'{patient_id}_OTP', 'NONE') == otp:
-            patient.access_list.add(request.user.doctor)
-            return redirect('view-documents', patient_id=patient_id)
-        context = {'otp': True, 'patient_id': patient_id, 'error': "Incorrect OTP"}
-        return render(request, 'app/view_documents.html', context=context)
+    reports = patient.report_set.all()
+    mris = patient.mri_set.all()
+    xrays = patient.xray_set.all()
+    prescriptions = patient.prescription_set.all()
+    something = (len(reports) or len(mris) or len(xrays) or len(prescriptions))
+    context = {'reports': reports, 'mris': mris, 'xrays': xrays, 'prescriptions': prescriptions, 'patient_id': patient_id, 'something': something}
+    return render(request, 'app/view_documents.html', context=context)
+        
+    # else:
+    #     otp = request.POST['otp']
+    #     actual_otp = request.session[f"{patient_id}_OTP"]
+    #     print(f"Actual OTP = {actual_otp} and received otp = {otp}")
+    #     if request.session.get(f'{patient_id}_OTP', 'NONE') == otp:
+    #         patient.access_list.add(request.user.doctor)
+    #         return redirect('view-documents', patient_id=patient_id)
+    #     context = {'otp': True, 'patient_id': patient_id, 'error': "Incorrect OTP"}
+    #     return render(request, 'app/view_documents.html', context=context)
         
 
 @login_required
@@ -169,18 +166,58 @@ def search_patient(request):
     if request.user.user_type == "0":
         return HttpResponse("Forbidden")
 
+    context = {"patients": request.user.doctor.patient_set.all(), "email": True}
     if request.method == "GET":
-        return render(request, 'app/search_patient.html')
+        context["email"] = True
+        context["otp"] = False
+        return render(request, 'app/search_patient.html', context=context)
     else:
-        email = request.POST["email"]
-        try:
-            user = User.objects.get(email=email)
-            if user.user_type == "1":
-                raise ObjectDoesNotExist
-        except ObjectDoesNotExist:
-            context = {"error": "Enter valid patient"}
+        if request.POST["type_id"] == "0":
+            doctor = request.user.doctor
+            patient_id = request.POST["patient_id"]
+            actual_otp = request.session.get(f'{patient_id}_OTP', "NONE")
+            otp = request.POST["otp"]
+            if actual_otp == otp:
+                patient = Patient.objects.get(id=int(patient_id))
+                patient.access_list.add(doctor)
+                return redirect('view-documents', patient_id)
+            else:
+                # context = {'otp': True, 'error': "Incorrect otp entered", 'patient_id': patient_id}
+                context["otp"] = True
+                context["email"] = False
+                context["error"] = "Incorrect otp entered"
+                context["patient_id"] = patient_id
+
+                return render(request, 'app/search_patient.html', context=context)
+            # if not patient in doctor.patient_set.all():
+                
+            #     context = {'otp': True, 'patient_id': patient_id}
+            #     return render(request, 'app/view_documents.html', context=context)
+
+        if request.POST["type_id"] == "1":
+            email = request.POST["email"]
+            try:
+                user = User.objects.get(email=email)
+                if user.user_type == "1":
+                    raise ObjectDoesNotExist
+                patient = user.patient
+                if request.user.doctor in patient.access_list.all():
+                    return redirect('view-documents', patient.id)
+            except ObjectDoesNotExist:
+                context["email"] = True
+                context["otp"] = False
+                context["error"] = "Enter valid patient"
+                return render(request, 'app/search_patient.html', context=context)
+
+            otp = "".join(random.choices(string.digits, k=6))
+            request.session[f"{patient.id}_OTP"] = otp
+            mail(patient.user.email, "OTP for accessing documents", f"Your OTP is {otp}")
+            context["otp"] = True
+            context["email"] = False
+            context["patient_id"] = patient.id
             return render(request, 'app/search_patient.html', context=context)
-        return redirect('view-documents', user.patient.id)
+        else:
+            return HttpResponse("Not found")
 
 
 @login_required
@@ -248,7 +285,7 @@ def upload_patient_data(request, patient_id):
         pass
     else:
         return HttpResponse("Not found")
-    return HttpResponse("Success")
+    return redirect('index')
     # return redirect('view-documents', patient_id)
 
 def validity_check(user, patient):
